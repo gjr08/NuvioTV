@@ -14,6 +14,12 @@ jobs:
         run: |
           sed -i 's/signingConfigs.getByName("release")/signingConfigs.getByName("debug")/g' app/build.gradle.kts
           grep -n getByName app/build.gradle.kts
+      - name: Aumentar capas da busca
+        run: |
+          F=app/src/main/java/com/nuvio/tv/ui/screens/search/SearchScreen.kt
+          sed -i 's/^\(\s*\)PosterCardStyle(\s*$/\1PosterCardStyle(\n\1    width = PosterCardStyle().width * 1.35f,\n\1    height = PosterCardStyle().height * 1.35f,/' $F
+          grep -n -A3 "PosterCardStyle($" $F
+          grep -q "1.35f" $F
       - run: chmod +x gradlew && ./gradlew :app:assembleFullDebug
       - uses: actions/upload-artifact@v4
         with:
