@@ -10,6 +10,22 @@ jobs:
           distribution: temurin
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
+      - name: Usar minha chave fixa
+        env:
+          KS_B64: ${{ secrets.KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.KEY_ALIAS }}
+          K_PASS: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          mkdir -p ~/.android
+          echo "$KS_B64" | base64 -d > nuvio.jks
+          rm -f ~/.android/debug.keystore
+          keytool -importkeystore -noprompt \
+            -srckeystore nuvio.jks -srcstorepass "$KS_PASS" \
+            -srcalias "$KS_ALIAS" -srckeypass "$K_PASS" \
+            -destkeystore ~/.android/debug.keystore -deststoretype PKCS12 \
+            -deststorepass android -destkeypass android \
+            -destalias androiddebugkey
       - name: Usar assinatura de teste
         run: |
           sed -i 's/signingConfigs.getByName("release")/signingConfigs.getByName("debug")/g' app/build.gradle.kts
